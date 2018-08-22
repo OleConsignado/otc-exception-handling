@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Globals">
     <SccProjectName>SAK</SccProjectName>
@@ -10,6 +10,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <PackageProjectUrl>https://github.com/OleConsignado/otc-exception-handling</PackageProjectUrl>
     <Authors>Ole Consignado</Authors>
     <Company>Ole Consignado</Company>
   </PropertyGroup>
@@ -25,7 +27,7 @@
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="1.1.0" />
-    <PackageReference Include="Otc.DomainBase.Exceptions" Version="1.0.0-v100-alpha2-build5" />
+    <PackageReference Include="Otc.DomainBase.Exceptions" Version="2.0.0" />
   </ItemGroup>
 
 </Project>

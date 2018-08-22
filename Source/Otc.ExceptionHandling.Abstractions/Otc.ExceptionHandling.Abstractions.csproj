@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Globals">
     <SccProjectName>SAK</SccProjectName>
@@ -10,6 +10,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <PackageProjectUrl>https://github.com/OleConsignado/otc-exception-handling</PackageProjectUrl>
     <Authors>Ole Consignado</Authors>
     <Company>Ole Consignado</Company>
     <Description>Otc.DomainBase.Exceptions.CoreException handling API.</Description>
