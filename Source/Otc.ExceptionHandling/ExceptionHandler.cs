@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Otc.DomainBase.Exceptions;
 using Otc.ExceptionHandling.Abstractions;
 using System;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,6 +37,10 @@ namespace Otc.ExceptionHandling
             {
                 await GenerateCoreExceptionResponseAsync(exception as CoreException, httpContext);
             }
+            else if (exception is UnauthorizedAccessException)
+            {
+                await GenerateUnauthorizadeExceptionResponseAsync(exception as UnauthorizedAccessException, httpContext);
+            }
             else
             {
                 await GenerateInternalErrorResposeAsync(exception, httpContext);
@@ -49,9 +54,22 @@ namespace Otc.ExceptionHandling
             await GenerateResponse(400, e, httpContext);
         }
 
+        /// <summary>
+        /// Retorna um httpStatusCode 401.
+        /// </summary>
+        /// <param name="e">Inner Exception</param>
+        /// <param name="httpContext">HttpContext</param>
+        /// <returns></returns>
+        private async Task GenerateUnauthorizadeExceptionResponseAsync(UnauthorizedAccessException e, HttpContext httpContext)
+        {
+            logger.LogInformation(0, e, "Ocorreu um acesso não autorizado.");
+
+            await GenerateResponse((int)HttpStatusCode.Unauthorized, e, httpContext);
+        }
+
         private bool IsDevelopmentEnvironment()
             => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
-        
+
         private async Task GenerateInternalErrorResposeAsync(Exception e, HttpContext httpContext)
         {
             var internalError = new InternalError()
@@ -71,7 +89,7 @@ namespace Otc.ExceptionHandling
 
             var jsonSerializerSettings = new JsonSerializerSettings()
             {
-                ContractResolver = 
+                ContractResolver =
                     new CoreExceptionJsonContractResolver()
                     {
                         IgnoreSerializableInterface = true
