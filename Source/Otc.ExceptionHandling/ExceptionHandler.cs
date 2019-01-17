@@ -39,7 +39,7 @@ namespace Otc.ExceptionHandling
             }
             else if (exception is UnauthorizedAccessException)
             {
-                await GenerateUnauthorizadeExceptionResponseAsync(exception as UnauthorizedAccessException, httpContext);
+                await GenerateUnauthorizadeExceptionResponseAsync(httpContext);
             }
             else
             {
@@ -49,7 +49,7 @@ namespace Otc.ExceptionHandling
 
         private async Task GenerateCoreExceptionResponseAsync(CoreException e, HttpContext httpContext)
         {
-            logger.LogInformation(0, e, "Ocorreu um erro de negócio.");
+            logger.LogInformation(e, "Ocorreu um erro de negócio.");
 
             await GenerateResponse(400, e, httpContext);
         }
@@ -60,11 +60,17 @@ namespace Otc.ExceptionHandling
         /// <param name="e">Inner Exception</param>
         /// <param name="httpContext">HttpContext</param>
         /// <returns></returns>
-        private async Task GenerateUnauthorizadeExceptionResponseAsync(UnauthorizedAccessException e, HttpContext httpContext)
+        private async Task GenerateUnauthorizadeExceptionResponseAsync(HttpContext httpContext)
         {
-            logger.LogInformation(0, e, "Ocorreu um acesso não autorizado.");
+            logger.LogInformation("Ocorreu um acesso não autorizado.");
 
-            await GenerateResponse((int)HttpStatusCode.Unauthorized, e, httpContext);
+            var forbidden = new
+            {
+                Key = "Forbidden",
+                Message = "Access to this resource is forbidden."
+            };
+
+            await GenerateResponse(403, forbidden, httpContext);
         }
 
         private bool IsDevelopmentEnvironment()
@@ -78,7 +84,7 @@ namespace Otc.ExceptionHandling
                 Exception = IsDevelopmentEnvironment() ? e : null
             };
 
-            logger.LogError(0, e, "{LogEntryId}: Ocorreu um erro não esperado.", internalError.LogEntryId);
+            logger.LogError(e, "{LogEntryId}: Ocorreu um erro não esperado.", internalError.LogEntryId);
 
             await GenerateResponse(500, internalError, httpContext);
         }
