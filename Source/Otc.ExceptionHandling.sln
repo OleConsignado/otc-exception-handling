@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otc.Mvc.Filters", "Otc.Mvc.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otc.SwaggerSchemaFiltering", "Otc.SwaggerSchemaFiltering\Otc.SwaggerSchemaFiltering.csproj", "{3ED1D9D7-CEDE-4836-AADF-01DE6A48CE30}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Otc.ExceptionHandling.Tests", "Otc.ExceptionHandling.Tests\Otc.ExceptionHandling.Tests.csproj", "{AE1E7330-064C-4F9C-876B-1CFA1E8272DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{3ED1D9D7-CEDE-4836-AADF-01DE6A48CE30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ED1D9D7-CEDE-4836-AADF-01DE6A48CE30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ED1D9D7-CEDE-4836-AADF-01DE6A48CE30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE1E7330-064C-4F9C-876B-1CFA1E8272DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE1E7330-064C-4F9C-876B-1CFA1E8272DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE1E7330-064C-4F9C-876B-1CFA1E8272DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE1E7330-064C-4F9C-876B-1CFA1E8272DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

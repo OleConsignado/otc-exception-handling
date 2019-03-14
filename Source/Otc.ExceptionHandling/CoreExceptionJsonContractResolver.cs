@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Otc.ExceptionHandling
 {
@@ -21,6 +22,20 @@ namespace Otc.ExceptionHandling
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
             JsonProperty property = base.CreateProperty(member, memberSerialization);
+            
+            if (member.MemberType == MemberTypes.Property)
+            {
+                var type = ((PropertyInfo)member).PropertyType;
+
+                if (type.IsGenericType &&
+                    type.GenericTypeArguments.Any(t => typeof(Expression).IsAssignableFrom(t)))
+                {
+                    property.Ignored = true;
+                }
+                else
+                    if (typeof(Expression).IsAssignableFrom(type))
+                        property.Ignored = true;
+            }
 
             if (ignoreProperties.Contains(member.Name))
             {
