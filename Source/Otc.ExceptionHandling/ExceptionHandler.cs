@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Otc.DomainBase.Exceptions;
 using Otc.ExceptionHandling.Abstractions;
+using Otc.ExceptionHandling.Abstractions.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,41 +31,50 @@ namespace Otc.ExceptionHandling
 
         public async Task<int> HandleExceptionAsync(Exception exception, HttpContext httpContext)
         {
+            bool hasConfiguration = false;
+            (httpContext.Response.StatusCode, exception, hasConfiguration) = await ValidateConfigurationsAsync(httpContext.Response.StatusCode, exception);
+
             if (exception is AggregateException)
             {
                 var aggregateException = exception as AggregateException;
-                int statusCode = 400;
 
                 foreach (var innerException in aggregateException.InnerExceptions)
                 {
-                    statusCode = await HandleExceptionAsync(innerException, httpContext);
+                    await HandleExceptionAsync(innerException, httpContext);
                 }
 
-                return statusCode;
+                return httpContext.Response.StatusCode;
             }
             else if (exception is CoreException)
             {
+                if (!hasConfiguration)
+                    httpContext.Response.StatusCode = 400;
+
                 return await GenerateCoreExceptionResponseAsync(exception as CoreException, httpContext);
             }
             else if (exception is UnauthorizedAccessException)
             {
+                if (!hasConfiguration)
+                    httpContext.Response.StatusCode = 403;
+
                 return await GenerateUnauthorizadeExceptionResponseAsync(httpContext);
             }
             else
             {
+                if (!hasConfiguration)
+                    httpContext.Response.StatusCode = 500;
+
                 return await GenerateInternalErrorResponseAsync(exception, httpContext);
             }
         }
 
         private async Task<int> GenerateCoreExceptionResponseAsync(CoreException e, HttpContext httpContext)
         {
-            int statusCode = 400;
-
             logger.LogInformation(e, "Ocorreu um erro de negócio.");
 
-            await GenerateResponseAsync(statusCode, e, httpContext);
+            await GenerateResponseAsync(e, httpContext);
 
-            return statusCode;
+            return httpContext.Response.StatusCode;
         }
 
         /// <summary>
@@ -75,7 +85,6 @@ namespace Otc.ExceptionHandling
         /// <returns></returns>
         private async Task<int> GenerateUnauthorizadeExceptionResponseAsync(HttpContext httpContext)
         {
-            int statusCode = 403;
             logger.LogInformation("Ocorreu um acesso não autorizado.");
 
             var forbidden = new
@@ -84,9 +93,9 @@ namespace Otc.ExceptionHandling
                 Message = "Access to this resource is forbidden."
             };
 
-            await GenerateResponseAsync(statusCode, forbidden, httpContext);
+            await GenerateResponseAsync(forbidden, httpContext);
 
-            return statusCode;
+            return httpContext.Response.StatusCode;
         }
 
         private bool IsDevelopmentEnvironment()
@@ -94,12 +103,9 @@ namespace Otc.ExceptionHandling
 
         private async Task<int> GenerateInternalErrorResponseAsync(Exception e, HttpContext httpContext)
         {
-            int statusCode = 500;
             Exception exception = e;
             Guid logEntryId = Guid.NewGuid();
-
-            (statusCode, exception) = await ValidateConfigurationsAsync(statusCode, e);
-
+            
             logger.LogError(e, "{LogEntryId}: Ocorreu um erro não esperado.", logEntryId);           
 
             var internalError = new InternalError()
@@ -108,15 +114,13 @@ namespace Otc.ExceptionHandling
                 Exception = (IsDevelopmentEnvironment() ? exception : null)
             };
 
-            await GenerateResponseAsync(statusCode, internalError, httpContext);
+            await GenerateResponseAsync( internalError, httpContext);
 
-            return statusCode;
+            return httpContext.Response.StatusCode;
         }
 
-        private async Task GenerateResponseAsync(int statusCode, object output, HttpContext httpContext)
+        private async Task GenerateResponseAsync(object output, HttpContext httpContext)
         {
-            httpContext.Response.StatusCode = statusCode;
-
             var jsonSerializerSettings = new JsonSerializerSettings()
             {
                 ContractResolver =
@@ -136,35 +140,39 @@ namespace Otc.ExceptionHandling
             await httpContext.Response.WriteAsync(message, Encoding.UTF8);
         }
 
-        private Task<(int statusCode, Exception exception)> ValidateConfigurationsAsync(int statusCode, Exception e)
+        private Task<(int statusCode, Exception exception, bool hasConfiguration)> ValidateConfigurationsAsync(int statusCode, Exception e)
         {
             Exception exception = e;
             int finalStatusCode = statusCode;
+            bool hasConfiguration = false;
             //Executar eventos
             if (configuration != null)
             {
                 if (configuration.Events.Any())
+                {
+                    hasConfiguration = true;
+
                     foreach (var @event in configuration.Events)
                     {
                         if (@event.IsElegible(statusCode, e))
                             (finalStatusCode, exception) = @event.Intercept(statusCode, e);
                     }
+                }
 
                 if (configuration.HasBehaviors)
                 {
+                    hasConfiguration = true;
+
                     var behaviorResult = configuration.ValidateBehavior(e);
 
                     if (behaviorResult != null)
                     {
                         switch (behaviorResult.Behavior)
                         {
-                            case Abstractions.Enums.ExceptionHandlerBehavior.Suppress:
+                            case ExceptionHandlerBehavior.ServerError:
                                 exception = e.GetBaseException();
                                 break;
-                            case Abstractions.Enums.ExceptionHandlerBehavior.Ignore:
-                                exception = null;
-                                break;
-                            case Abstractions.Enums.ExceptionHandlerBehavior.Expose:
+                            case ExceptionHandlerBehavior.ClientError:
                             default:
                                 break;
                         }
@@ -174,7 +182,7 @@ namespace Otc.ExceptionHandling
                 }
             }
 
-            return Task.FromResult((finalStatusCode, exception));
+            return Task.FromResult((finalStatusCode, exception, hasConfiguration));
 
         }
     }

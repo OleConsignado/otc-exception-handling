@@ -18,6 +18,7 @@ namespace Otc.ExceptionHandling.Tests
     {
         IServiceProvider serviceProvider;
         HttpContext httpContext;
+        int statusCode;
         public ExceptionHandlerEventTest()
         {
             var httpContextMock = new Mock<HttpContext>();
@@ -29,6 +30,14 @@ namespace Otc.ExceptionHandling.Tests
 
             })
             .Returns(() => Task.CompletedTask);
+
+            response.SetupSet(p => p.StatusCode = It.IsAny<int>()).Callback<int>(c =>
+            {
+                statusCode = c;
+                response.SetupGet(p => p.StatusCode).Returns(statusCode);
+            }) ;
+
+            
 
             httpContextMock.Setup(x => x.Response).Returns(() => response.Object);
 
@@ -43,7 +52,7 @@ namespace Otc.ExceptionHandling.Tests
 
             serviceCollection.AddExceptionHandling();
             serviceCollection.AddExceptionHandlingConfiguration(config =>
-                config.ForException<NullReferenceException>(405, Abstractions.Enums.ExceptionHandlerBehavior.Suppress)
+                config.ForException<NullReferenceException>(405, Abstractions.Enums.ExceptionHandlerBehavior.ServerError)
                 );
 
             serviceCollection.AddScoped<ILoggerFactory>(ctx => new LoggerFactory());
@@ -65,7 +74,7 @@ namespace Otc.ExceptionHandling.Tests
 
             serviceCollection.AddExceptionHandling();
             serviceCollection.AddExceptionHandlingConfiguration(config =>
-                config.ForException("NullReferenceException", 411, Abstractions.Enums.ExceptionHandlerBehavior.Suppress)
+                config.ForException("NullReferenceException", 411, Abstractions.Enums.ExceptionHandlerBehavior.ServerError)
                 );
 
             serviceCollection.AddScoped<ILoggerFactory>(ctx => new LoggerFactory());

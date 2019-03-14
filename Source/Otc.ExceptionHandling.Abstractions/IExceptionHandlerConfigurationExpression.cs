@@ -39,7 +39,7 @@ namespace Otc.ExceptionHandling.Abstractions
         /// Expose - Log and returns the entire exception.
         /// Suppress - Log and returns only the base exception.
         /// Ignore - Ignore the entire exception.</param>
-        IExceptionHandlerConfigurationExpression ForException<TException>(int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.Expose) 
+        IExceptionHandlerConfigurationExpression ForException<TException>(int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError) 
             where TException : Exception;
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Otc.ExceptionHandling.Abstractions
         /// Expose - Log and returns the entire exception.
         /// Suppress - Log and returns only the base exception.
         /// Ignore - Ignore the entire exception.</param>
-        IExceptionHandlerConfigurationExpression ForException(string exception, int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.Expose);
+        IExceptionHandlerConfigurationExpression ForException(string exception, int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError);
 
     }
 }

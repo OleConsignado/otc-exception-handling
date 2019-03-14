@@ -5,15 +5,18 @@ using System.Text;
 namespace Otc.ExceptionHandling.Abstractions.Enums
 {
     /// <summary>
-    /// Add behaviors for an exception. 
-    /// Expose - Log and returns the entire exception.
-    /// Suppress - Log and returns only the base exception.
-    /// Ignore - Ignore the entire exception.
+    /// Add behaviors for an exception.
     /// </summary>
     public enum ExceptionHandlerBehavior
     {
-        Expose = 1,
-        Suppress = 2,
-        Ignore = 3
+        /// <summary>
+        /// Expose entire exception on HttpOutput and log it as information level.
+        /// </summary>
+        ClientError = 1,
+        /// <summary>
+        /// Generates an identifier for exception and suppress it on HttpOutput by exposing only the identifier. 
+        /// Log it as error level with the same identifier.
+        /// </summary>
+        ServerError = 2
     }
 }
