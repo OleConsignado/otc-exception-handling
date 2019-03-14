@@ -52,7 +52,7 @@ namespace Otc.ExceptionHandling
             }
             else
             {
-                return await GenerateInternalErrorResposeAsync(exception, httpContext);
+                return await GenerateInternalErrorResponseAsync(exception, httpContext);
             }
         }
 
@@ -92,7 +92,7 @@ namespace Otc.ExceptionHandling
         private bool IsDevelopmentEnvironment()
             => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
-        private async Task<int> GenerateInternalErrorResposeAsync(Exception e, HttpContext httpContext)
+        private async Task<int> GenerateInternalErrorResponseAsync(Exception e, HttpContext httpContext)
         {
             int statusCode = 500;
             Exception exception = e;

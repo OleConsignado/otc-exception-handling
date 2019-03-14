@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Otc.DomainBase.Exceptions;
 using Otc.ExceptionHandling.Abstractions;
 using Otc.ExceptionHandling.Tests;
 using System;
@@ -99,6 +100,94 @@ namespace Otc.ExceptionHandling.Tests
 
             Assert.Equal(200, statusCode);
         }
+
+        [Fact]
+        [Trait("ExceptionHandler_Unauthorized", "Success")]
+        public async Task ExceptionHandler_Unauthorized_Success()
+        {
+            var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddExceptionHandling();
+
+            serviceCollection.AddScoped<ILoggerFactory>(ctx => new LoggerFactory());
+
+            serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var exceptionHandler = serviceProvider.GetRequiredService<IExceptionHandler>();
+
+            var statusCode = await exceptionHandler.HandleExceptionAsync(new UnauthorizedAccessException(), httpContext);
+
+            Assert.Equal(403, statusCode);
+        }
+
+        [Fact]
+        [Trait("ExceptionHandler_CoreException", "Success")]
+        public async Task ExceptionHandler_CoreException_Success()
+        {
+            var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddExceptionHandling();
+
+            serviceCollection.AddScoped<ILoggerFactory>(ctx => new LoggerFactory());
+
+            serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var exceptionHandler = serviceProvider.GetRequiredService<IExceptionHandler>();
+
+            var statusCode = await exceptionHandler.HandleExceptionAsync(new DomainException(), httpContext);
+
+            Assert.Equal(400, statusCode);
+        }
+
+        [Fact]
+        [Trait("ExceptionHandler_Exception", "Success")]
+        public async Task ExceptionHandler_Exception_Success()
+        {
+            var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddExceptionHandling();
+
+            serviceCollection.AddScoped<ILoggerFactory>(ctx => new LoggerFactory());
+
+            serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var exceptionHandler = serviceProvider.GetRequiredService<IExceptionHandler>();
+
+            var statusCode = await exceptionHandler.HandleExceptionAsync(new Exception(), httpContext);
+
+            Assert.Equal(500, statusCode);
+        }
+
+
+        [Fact]
+        [Trait("ExceptionHandler_AggregateException", "Success")]
+        public async Task ExceptionHandler_AggregateException_Success()
+        {
+            var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddExceptionHandling();
+
+            serviceCollection.AddScoped<ILoggerFactory>(ctx => new LoggerFactory());
+
+            serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var exceptionHandler = serviceProvider.GetRequiredService<IExceptionHandler>();
+
+            var aggEx = new AggregateException(new Exception(), new DomainException());
+
+            var statusCode = await exceptionHandler.HandleExceptionAsync(aggEx, httpContext);
+
+            Assert.Equal(400, statusCode);
+        }
+    }
+
+    public class DomainException : CoreException
+    {
+        public DomainException() : base("erro")
+        {
+
+        }
+        public override string Key => "DomainException";
     }
 
     public class ExceptionEvent : IExceptionHandlerEvent

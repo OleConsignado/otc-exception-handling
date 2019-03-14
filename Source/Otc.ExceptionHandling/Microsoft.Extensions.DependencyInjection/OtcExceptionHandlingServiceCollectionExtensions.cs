@@ -14,13 +14,15 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (configuration != null)
                 services.AddExceptionHandlingConfiguration(configuration);
+            else
+                services.AddScoped<IExceptionHandlerConfiguration>(cfg => null);
 
             services.AddScoped<IExceptionHandler, ExceptionHandler>();
 
             return services;
         }
 
-        public static IServiceCollection AddExceptionHandlingConfiguration(this IServiceCollection services, Action<IExceptionHandlerConfigurationExpression> configuration = null)
+        public static IServiceCollection AddExceptionHandlingConfiguration(this IServiceCollection services, Action<IExceptionHandlerConfigurationExpression> configuration)
         {
             services.AddSingleton<IExceptionHandlerConfiguration>(cfg => new ExceptionHandlerConfiguration(configuration));
 
