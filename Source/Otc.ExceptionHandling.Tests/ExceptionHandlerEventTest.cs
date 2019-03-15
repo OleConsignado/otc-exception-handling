@@ -17,7 +17,7 @@ namespace Otc.ExceptionHandling.Tests
     public class ExceptionHandlerEventTest
     {
         IServiceProvider serviceProvider;
-        HttpContext httpContext;
+        readonly HttpContext httpContext;
         int statusCode;
         public ExceptionHandlerEventTest()
         {
@@ -52,7 +52,7 @@ namespace Otc.ExceptionHandling.Tests
 
             serviceCollection.AddExceptionHandling();
             serviceCollection.AddExceptionHandlingConfiguration(config =>
-                config.ForException<NullReferenceException>(405, Abstractions.Enums.ExceptionHandlerBehavior.ServerError)
+                config.ForException<NullReferenceException>(405, Abstractions.ExceptionHandlerBehavior.ServerError)
                 );
 
             serviceCollection.AddScoped<ILoggerFactory>(ctx => new LoggerFactory());
@@ -74,7 +74,7 @@ namespace Otc.ExceptionHandling.Tests
 
             serviceCollection.AddExceptionHandling();
             serviceCollection.AddExceptionHandlingConfiguration(config =>
-                config.ForException("NullReferenceException", 411, Abstractions.Enums.ExceptionHandlerBehavior.ServerError)
+                config.ForException("NullReferenceException", 411, Abstractions.ExceptionHandlerBehavior.ServerError)
                 );
 
             serviceCollection.AddScoped<ILoggerFactory>(ctx => new LoggerFactory());

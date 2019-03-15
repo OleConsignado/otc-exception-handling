@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Otc.DomainBase.Exceptions;
 using Otc.ExceptionHandling.Abstractions;
-using Otc.ExceptionHandling.Abstractions.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

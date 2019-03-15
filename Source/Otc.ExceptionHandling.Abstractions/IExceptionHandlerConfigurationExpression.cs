@@ -1,5 +1,4 @@
-﻿using Otc.ExceptionHandling.Abstractions.Configurations;
-using Otc.ExceptionHandling.Abstractions.Enums;
+﻿using Otc.ExceptionHandling.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -45,7 +44,7 @@ namespace Otc.ExceptionHandling.Abstractions
         /// <summary>
         /// Add an custom behavior for an exception that occurs on application.
         /// </summary>
-        /// <param name="exception">Type of the exception that will have custom behaviors.</typeparam>
+        /// <param name="exception">Type of the exception that will have custom behaviors.</param>
         /// <param name="statusCode">Status code that will be returned for that exception.</param>
         /// <param name="behavior">Behavior for that exception. 
         /// Expose - Log and returns the entire exception.

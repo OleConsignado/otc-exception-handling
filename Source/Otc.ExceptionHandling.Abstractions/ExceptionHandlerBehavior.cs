@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Otc.ExceptionHandling.Abstractions.Enums
+namespace Otc.ExceptionHandling.Abstractions
 {
     /// <summary>
     /// Add behaviors for an exception.

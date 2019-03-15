@@ -1,9 +1,9 @@
-﻿using Otc.ExceptionHandling.Abstractions.Enums;
+﻿using Otc.ExceptionHandling.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Otc.ExceptionHandling.Abstractions.Configurations
+namespace Otc.ExceptionHandling.Abstractions
 {
     public class ForExceptionBehavior
     {

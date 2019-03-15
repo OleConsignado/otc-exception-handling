@@ -1,5 +1,4 @@
 ﻿using Otc.ExceptionHandling.Abstractions;
-using Otc.ExceptionHandling.Abstractions.Configurations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
