@@ -1,6 +1,7 @@
 language: csharp
 mono: none
-dotnet: 2.0.3
+dist: xenial
+dotnet: 2.2
 
 install: 
 - bash ./cicd.sh install
