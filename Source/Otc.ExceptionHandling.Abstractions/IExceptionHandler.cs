@@ -6,6 +6,6 @@ namespace Otc.ExceptionHandling.Abstractions
 {
     public interface IExceptionHandler
     {
-        Task HandleExceptionAsync(Exception exception, HttpContext httpContext);
+        Task<int> HandleExceptionAsync(Exception exception, HttpContext httpContext);
     }
 }
