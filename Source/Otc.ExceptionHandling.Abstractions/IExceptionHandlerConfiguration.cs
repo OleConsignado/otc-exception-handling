@@ -23,12 +23,5 @@ namespace Otc.ExceptionHandling.Abstractions
         /// Validate if there is behaviors registereds.
         /// </summary>
         bool HasBehaviors { get; }
-
-        /// <summary>
-        /// Validate if there is configuration for specific exceptions on exception handling setup
-        /// </summary>
-        /// <param name="exceptionName">Exception name to validate.</param>
-        /// <returns>Object containing status code and the expected behavior when that exception occurs.</returns>
-        ForExceptionBehavior ValidateBehavior(string exceptionName);
     }
 }

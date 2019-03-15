@@ -16,7 +16,7 @@ namespace Otc.ExceptionHandling.Abstractions
         /// <summary>
         /// Get behaviors registered on ExceptionHandler pipeline
         /// </summary>
-        Dictionary<string, ForExceptionBehavior> Behaviors { get; }
+        Dictionary<Type, ForExceptionBehavior> Behaviors { get; }
 
         /// <summary>
         /// Add events to intercept exception and will execute on ExceptionHandler pipeline.
@@ -50,7 +50,7 @@ namespace Otc.ExceptionHandling.Abstractions
         /// Expose - Log and returns the entire exception.
         /// Suppress - Log and returns only the base exception.
         /// Ignore - Ignore the entire exception.</param>
-        IExceptionHandlerConfigurationExpression ForException(string exception, int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError);
+        IExceptionHandlerConfigurationExpression ForException(Type exception, int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError);
 
     }
 }

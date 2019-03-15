@@ -1,6 +1,5 @@
 ﻿using Otc.ExceptionHandling;
 using Otc.ExceptionHandling.Abstractions;
-using Otc.ExceptionHandling.Configuration;
 using System;
 
 namespace Microsoft.Extensions.DependencyInjection

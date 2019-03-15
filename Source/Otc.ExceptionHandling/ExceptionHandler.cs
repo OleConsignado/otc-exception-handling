@@ -30,8 +30,9 @@ namespace Otc.ExceptionHandling
 
         public async Task<int> HandleExceptionAsync(Exception exception, HttpContext httpContext)
         {
-            bool hasConfiguration = false;
-            (httpContext.Response.StatusCode, exception, hasConfiguration) = await ValidateConfigurationsAsync(httpContext.Response.StatusCode, exception);
+            ExceptionHandlerBehavior? behavior = null;
+            (httpContext.Response.StatusCode, exception, behavior) = 
+                await ValidateConfigurationsAsync(httpContext.Response.StatusCode, exception);
 
             if (exception is AggregateException)
             {
@@ -41,33 +42,55 @@ namespace Otc.ExceptionHandling
                 {
                     await HandleExceptionAsync(innerException, httpContext);
                 }
-
-                return httpContext.Response.StatusCode;
-            }
-            else if (exception is CoreException)
-            {
-                if (!hasConfiguration)
-                    httpContext.Response.StatusCode = 400;
-
-                return await GenerateCoreExceptionResponseAsync(exception as CoreException, httpContext);
-            }
-            else if (exception is UnauthorizedAccessException)
-            {
-                if (!hasConfiguration)
-                    httpContext.Response.StatusCode = 403;
-
-                return await GenerateUnauthorizadeExceptionResponseAsync(httpContext);
             }
             else
             {
-                if (!hasConfiguration)
-                    httpContext.Response.StatusCode = 500;
+                if (!behavior.HasValue)
+                {
+                    if (exception is UnauthorizedAccessException)
+                    {
+                        httpContext.Response.StatusCode = 403;
 
-                return await GenerateInternalErrorResponseAsync(exception, httpContext);
+                        return await GenerateUnauthorizadeExceptionResponseAsync(httpContext);
+                    }
+
+                    behavior = await IdentifyBehaviorAsync(exception, httpContext);
+                }
+
+                switch (behavior)
+                {
+                    case ExceptionHandlerBehavior.ClientError:
+                        return await GenerateCoreExceptionResponseAsync(exception, httpContext);
+                 
+                    case ExceptionHandlerBehavior.ServerError:
+                        return await GenerateInternalErrorResponseAsync(exception, httpContext);
+                 
+                }
             }
+
+            return httpContext.Response.StatusCode;
         }
 
-        private async Task<int> GenerateCoreExceptionResponseAsync(CoreException e, HttpContext httpContext)
+        private async Task<ExceptionHandlerBehavior> IdentifyBehaviorAsync(Exception exception, HttpContext httpContext)
+        {
+            ExceptionHandlerBehavior behavior;
+
+            if (exception is CoreException)
+            {
+                behavior = ExceptionHandlerBehavior.ClientError;
+
+                httpContext.Response.StatusCode = 400;
+            }
+            else
+            {
+                behavior = ExceptionHandlerBehavior.ServerError;
+                httpContext.Response.StatusCode = 500;
+            }
+
+            return behavior;
+        }
+
+        private async Task<int> GenerateCoreExceptionResponseAsync(Exception e, HttpContext httpContext)
         {
             logger.LogInformation(e, "Ocorreu um erro de negócio.");
 
@@ -139,49 +162,38 @@ namespace Otc.ExceptionHandling
             await httpContext.Response.WriteAsync(message, Encoding.UTF8);
         }
 
-        private Task<(int statusCode, Exception exception, bool hasConfiguration)> ValidateConfigurationsAsync(int statusCode, Exception e)
+        private Task<(int statusCode, Exception exception, ExceptionHandlerBehavior? behavior)> ValidateConfigurationsAsync(int statusCode, Exception e)
         {
             Exception exception = e;
             int finalStatusCode = statusCode;
-            bool hasConfiguration = false;
+            ExceptionHandlerBehavior? behavior = null;
+
             //Executar eventos
             if (configuration != null)
             {
                 if (configuration.Events.Any())
                 {
-                    hasConfiguration = true;
-
                     foreach (var @event in configuration.Events)
                     {
                         if (@event.IsElegible(statusCode, e))
-                            (finalStatusCode, exception) = @event.Intercept(statusCode, e);
+                            (finalStatusCode, exception, behavior) = @event.Intercept(statusCode, e);
                     }
                 }
 
                 if (configuration.HasBehaviors)
                 {
-                    hasConfiguration = true;
-
                     var behaviorResult = configuration.ValidateBehavior(e);
 
                     if (behaviorResult != null)
                     {
-                        switch (behaviorResult.Behavior)
-                        {
-                            case ExceptionHandlerBehavior.ServerError:
-                                exception = e.GetBaseException();
-                                break;
-                            case ExceptionHandlerBehavior.ClientError:
-                            default:
-                                break;
-                        }
+                        behavior = behaviorResult.Behavior;                       
 
                         finalStatusCode = behaviorResult.StatusCode;
                     }
                 }
             }
 
-            return Task.FromResult((finalStatusCode, exception, hasConfiguration));
+            return Task.FromResult((finalStatusCode, exception, behavior));
 
         }
     }

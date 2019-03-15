@@ -4,18 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Otc.ExceptionHandling.Configuration
+namespace Otc.ExceptionHandling
 {
     public class ExceptionHandlerConfiguration : IExceptionHandlerConfiguration
     {
         public ExceptionHandlerConfiguration(Action<IExceptionHandlerConfigurationExpression> action)
         {
             this.Events = new List<IExceptionHandlerEvent>();
-            behaviors = new Dictionary<string, ForExceptionBehavior>();
+            behaviors = new Dictionary<Type, ForExceptionBehavior>();
             Build(action);
         }
 
-        private Dictionary<string, ForExceptionBehavior> behaviors;
+        private Dictionary<Type, ForExceptionBehavior> behaviors;
 
         public List<IExceptionHandlerEvent> Events { get; }
 
@@ -23,17 +23,15 @@ namespace Otc.ExceptionHandling.Configuration
 
         public ForExceptionBehavior ValidateBehavior(Exception ex)
         {
-            return ValidateBehavior(ex.GetType().Name);
-        }
-
-        public ForExceptionBehavior ValidateBehavior(string exceptionName)
-        {
-            if (behaviors.TryGetValue(exceptionName, out ForExceptionBehavior behavior))
-                return behavior;
+            foreach (var behavior in behaviors)
+            {
+                if (behavior.Key.IsAssignableFrom(ex.GetType()))
+                    return behavior.Value;
+            }
 
             return null;
         }
-
+        
         private void Build(Action<IExceptionHandlerConfigurationExpression> action)
         {
             var configurationExpression = new ExceptionHandlerConfigurationExpression();
@@ -42,7 +40,7 @@ namespace Otc.ExceptionHandling.Configuration
 
             this.Events.AddRange(configurationExpression.Events);
 
-            this.behaviors = new Dictionary<string, ForExceptionBehavior>(configurationExpression.Behaviors);
+            this.behaviors = new Dictionary<Type, ForExceptionBehavior>(configurationExpression.Behaviors);
         }
     }
 }

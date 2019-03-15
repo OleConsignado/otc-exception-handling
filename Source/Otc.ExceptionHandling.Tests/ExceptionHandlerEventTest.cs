@@ -74,7 +74,7 @@ namespace Otc.ExceptionHandling.Tests
 
             serviceCollection.AddExceptionHandling();
             serviceCollection.AddExceptionHandlingConfiguration(config =>
-                config.ForException("NullReferenceException", 411, Abstractions.ExceptionHandlerBehavior.ServerError)
+                config.ForException(typeof(NullReferenceException), 411, Abstractions.ExceptionHandlerBehavior.ServerError)
                 );
 
             serviceCollection.AddScoped<ILoggerFactory>(ctx => new LoggerFactory());
@@ -201,9 +201,9 @@ namespace Otc.ExceptionHandling.Tests
 
     public class ExceptionEvent : IExceptionHandlerEvent
     {
-        public (int statusCode, Exception exception) Intercept(int statusCode, Exception exception)
+        public (int statusCode, Exception exception, ExceptionHandlerBehavior behavior) Intercept(int statusCode, Exception exception)
         {
-            return (200, new Exception("nova exception"));
+            return (200, new Exception("nova exception"), ExceptionHandlerBehavior.ServerError);
         }
 
         public bool IsElegible(int statusCode, Exception exception)

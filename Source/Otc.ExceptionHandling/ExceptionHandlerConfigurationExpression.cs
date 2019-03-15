@@ -4,19 +4,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Otc.ExceptionHandling.Configuration
+namespace Otc.ExceptionHandling
 {
     public class ExceptionHandlerConfigurationExpression : IExceptionHandlerConfigurationExpression
     {
         public ExceptionHandlerConfigurationExpression()
         {
             Events = new List<IExceptionHandlerEvent>();
-            Behaviors = new Dictionary<string, ForExceptionBehavior>();
+            Behaviors = new Dictionary<Type, ForExceptionBehavior>();
         }
 
         public List<IExceptionHandlerEvent> Events { get; }
 
-        public Dictionary<string, ForExceptionBehavior> Behaviors { get; }
+        public Dictionary<Type, ForExceptionBehavior> Behaviors { get; }
 
         public IExceptionHandlerConfigurationExpression AddEvent(IExceptionHandlerEvent @event)
         {
@@ -30,12 +30,12 @@ namespace Otc.ExceptionHandling.Configuration
 
         public IExceptionHandlerConfigurationExpression ForException<TException>(int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError) where TException : Exception
         {
-            ForException(typeof(TException).Name, statusCode, behavior);
+            ForException(typeof(TException), statusCode, behavior);
 
             return this;
         }
 
-        public IExceptionHandlerConfigurationExpression ForException(string exception, int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError)
+        public IExceptionHandlerConfigurationExpression ForException(Type exception, int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError)
         {
             Behaviors.Add(exception, new ForExceptionBehavior() { StatusCode = statusCode, Behavior = behavior });
 
