@@ -5,7 +5,7 @@ set -e
 CICD_COMMON_VERSION="v2.2"
 
 export CLASS_LIBRARY_PROJ_DIR=Source/Otc.ExceptionHandling.Abstractions
-# export TEST_PROJ_DIR=Source/Otc.ExceptionHandling.Tests
+export TEST_PROJ_DIR=Source/Otc.ExceptionHandling.Tests
 
 cd $TRAVIS_BUILD_DIR
 
