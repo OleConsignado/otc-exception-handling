@@ -133,7 +133,7 @@ namespace Otc.ExceptionHandling
             var internalError = new InternalError()
             {
                 LogEntryId = logEntryId,
-                Exception = (IsDevelopmentEnvironment() ? exception : null)
+                Exception = (IsDevelopmentEnvironment() ? exception.GetBaseException() : null)
             };
 
             await GenerateResponseAsync( internalError, httpContext);
