@@ -10,7 +10,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <VersionPrefix>3.1.1</VersionPrefix>
+    <VersionPrefix>3.1.2</VersionPrefix>
     <PackageProjectUrl>https://github.com/OleConsignado/otc-exception-handling</PackageProjectUrl>
     <Authors>Ole Consignado</Authors>
     <Company>Ole Consignado</Company>
@@ -30,7 +30,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="Otc.DomainBase.Exceptions" Version="3.0.0" />
+    <PackageReference Include="Otc.DomainBase.Exceptions" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>
