@@ -2,12 +2,9 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Otc.DomainBase.Exceptions;
-using Otc.ExceptionHandling.Abstractions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Otc.ExceptionHandling
@@ -15,88 +12,52 @@ namespace Otc.ExceptionHandling
     public class ExceptionHandler : IExceptionHandler
     {
         private readonly ILogger logger;
-        private readonly IExceptionHandlerConfiguration configuration;
+        private readonly IHttpResponseWriter httpResponseWriter;
 
-        public ExceptionHandler(ILoggerFactory loggerFactory,
-            IExceptionHandlerConfiguration configuration)
+        public ExceptionHandler(ILoggerFactory loggerFactory, IHttpResponseWriter httpResponseWriter)
         {
-            logger = loggerFactory?.CreateLogger<ExceptionHandler>();
-
-            this.configuration = configuration;
-
-            if (logger == null)
+            logger = loggerFactory?.CreateLogger<ExceptionHandler>() ??
                 throw new ArgumentNullException(nameof(loggerFactory));
+            this.httpResponseWriter = httpResponseWriter ?? 
+                throw new ArgumentNullException(nameof(httpResponseWriter));
         }
 
-        public async Task<int> HandleExceptionAsync(Exception exception, HttpContext httpContext)
+        public async Task HandleExceptionAsync(Exception exception)
         {
-            ExceptionHandlerBehavior? behavior = null;
-            (httpContext.Response.StatusCode, exception, behavior) = 
-                await ValidateConfigurationsAsync(httpContext.Response.StatusCode, exception);
-
             if (exception is AggregateException)
             {
                 var aggregateException = exception as AggregateException;
 
                 foreach (var innerException in aggregateException.InnerExceptions)
                 {
-                    await HandleExceptionAsync(innerException, httpContext);
+                    await HandleExceptionAsync(innerException);
                 }
             }
             else
             {
-                if (!behavior.HasValue)
+                if (exception is UnauthorizedAccessException)
                 {
-                    if (exception is UnauthorizedAccessException)
-                    {
-                        httpContext.Response.StatusCode = 403;
-
-                        return await GenerateUnauthorizadeExceptionResponseAsync(httpContext);
-                    }
-
-                    behavior = await IdentifyBehaviorAsync(exception, httpContext);
+                    httpResponseWriter.StatusCode = 403;
+                    await GenerateUnauthorizadeExceptionResponseAsync();
                 }
-
-                switch (behavior)
+                else if (exception is CoreException)
                 {
-                    case ExceptionHandlerBehavior.ClientError:
-                        return await GenerateCoreExceptionResponseAsync(exception, httpContext);
-                 
-                    case ExceptionHandlerBehavior.ServerError:
-                        return await GenerateInternalErrorResponseAsync(exception, httpContext);
-                 
+                    httpResponseWriter.StatusCode = 400;
+                    await GenerateCoreExceptionResponseAsync(exception);
+                }
+                else
+                {
+                    httpResponseWriter.StatusCode = 500;
+                    await GenerateInternalErrorResponseAsync(exception);
                 }
             }
-
-            return httpContext.Response.StatusCode;
         }
 
-        private async Task<ExceptionHandlerBehavior> IdentifyBehaviorAsync(Exception exception, HttpContext httpContext)
-        {
-            ExceptionHandlerBehavior behavior;
-
-            if (exception is CoreException)
-            {
-                behavior = ExceptionHandlerBehavior.ClientError;
-
-                httpContext.Response.StatusCode = 400;
-            }
-            else
-            {
-                behavior = ExceptionHandlerBehavior.ServerError;
-                httpContext.Response.StatusCode = 500;
-            }
-
-            return behavior;
-        }
-
-        private async Task<int> GenerateCoreExceptionResponseAsync(Exception e, HttpContext httpContext)
+        private async Task GenerateCoreExceptionResponseAsync(Exception e)
         {
             logger.LogInformation(e, "Ocorreu um erro de negócio.");
 
-            await GenerateResponseAsync(e, httpContext);
-
-            return httpContext.Response.StatusCode;
+            await GenerateResponseAsync(e);
         }
 
         /// <summary>
@@ -105,7 +66,7 @@ namespace Otc.ExceptionHandling
         /// <param name="e">Inner Exception</param>
         /// <param name="httpContext">HttpContext</param>
         /// <returns></returns>
-        private async Task<int> GenerateUnauthorizadeExceptionResponseAsync(HttpContext httpContext)
+        private async Task GenerateUnauthorizadeExceptionResponseAsync()
         {
             logger.LogInformation("Ocorreu um acesso não autorizado.");
 
@@ -115,15 +76,13 @@ namespace Otc.ExceptionHandling
                 Message = "Access to this resource is forbidden."
             };
 
-            await GenerateResponseAsync(forbidden, httpContext);
-
-            return httpContext.Response.StatusCode;
+            await GenerateResponseAsync(forbidden);
         }
 
         private bool IsDevelopmentEnvironment()
             => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
-        private async Task<int> GenerateInternalErrorResponseAsync(Exception e, HttpContext httpContext)
+        private async Task GenerateInternalErrorResponseAsync(Exception e)
         {
             Exception exception = e;
             Guid logEntryId = Guid.NewGuid();
@@ -136,12 +95,10 @@ namespace Otc.ExceptionHandling
                 Exception = (IsDevelopmentEnvironment() ? exception.GetBaseException() : null)
             };
 
-            await GenerateResponseAsync( internalError, httpContext);
-
-            return httpContext.Response.StatusCode;
+            await GenerateResponseAsync(internalError);
         }
 
-        private async Task GenerateResponseAsync(object output, HttpContext httpContext)
+        private async Task GenerateResponseAsync(object output)
         {
             var jsonSerializerSettings = new JsonSerializerSettings()
             {
@@ -158,43 +115,8 @@ namespace Otc.ExceptionHandling
 
             var message = JsonConvert.SerializeObject(output, jsonSerializerSettings);
 
-            httpContext.Response.ContentType = "application/json";
-            await httpContext.Response.WriteAsync(message, Encoding.UTF8);
-        }
-
-        private Task<(int statusCode, Exception exception, ExceptionHandlerBehavior? behavior)> ValidateConfigurationsAsync(int statusCode, Exception e)
-        {
-            Exception exception = e;
-            int finalStatusCode = statusCode;
-            ExceptionHandlerBehavior? behavior = null;
-
-            //Executar eventos
-            if (configuration != null)
-            {
-                if (configuration.Events.Any())
-                {
-                    foreach (var @event in configuration.Events)
-                    {
-                        if (@event.IsElegible(statusCode, e))
-                            (finalStatusCode, exception, behavior) = @event.Intercept(statusCode, e);
-                    }
-                }
-
-                if (configuration.HasBehaviors)
-                {
-                    var behaviorResult = configuration.ValidateBehavior(e);
-
-                    if (behaviorResult != null)
-                    {
-                        behavior = behaviorResult.Behavior;                       
-
-                        finalStatusCode = behaviorResult.StatusCode;
-                    }
-                }
-            }
-
-            return Task.FromResult((finalStatusCode, exception, behavior));
-
+            httpResponseWriter.ContentType = "application/json";
+            await httpResponseWriter.WriteAsync(message, Encoding.UTF8);
         }
     }
 }

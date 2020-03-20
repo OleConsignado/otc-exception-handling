@@ -1,17 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otc.ExceptionHandling.Abstractions", "Otc.ExceptionHandling.Abstractions\Otc.ExceptionHandling.Abstractions.csproj", "{AE02C5A1-69F6-4502-9C9D-78CB2E9625CB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otc.ExceptionHandling", "Otc.ExceptionHandling\Otc.ExceptionHandling.csproj", "{79859482-09BE-4C3E-ACB6-1CEC5A54DDC5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otc.Mvc.Filters", "Otc.Mvc.Filters\Otc.Mvc.Filters.csproj", "{64D6B8E3-09E7-48C6-BF1A-99EF6806F67B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otc.SwaggerSchemaFiltering", "Otc.SwaggerSchemaFiltering\Otc.SwaggerSchemaFiltering.csproj", "{3ED1D9D7-CEDE-4836-AADF-01DE6A48CE30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Otc.ExceptionHandling.Tests", "Otc.ExceptionHandling.Tests\Otc.ExceptionHandling.Tests.csproj", "{AE1E7330-064C-4F9C-876B-1CFA1E8272DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otc.ExceptionHandling.Tests", "Otc.ExceptionHandling.Tests\Otc.ExceptionHandling.Tests.csproj", "{AE1E7330-064C-4F9C-876B-1CFA1E8272DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AE02C5A1-69F6-4502-9C9D-78CB2E9625CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AE02C5A1-69F6-4502-9C9D-78CB2E9625CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AE02C5A1-69F6-4502-9C9D-78CB2E9625CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AE02C5A1-69F6-4502-9C9D-78CB2E9625CB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{79859482-09BE-4C3E-ACB6-1CEC5A54DDC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{79859482-09BE-4C3E-ACB6-1CEC5A54DDC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79859482-09BE-4C3E-ACB6-1CEC5A54DDC5}.Release|Any CPU.ActiveCfg = Release|Any CPU

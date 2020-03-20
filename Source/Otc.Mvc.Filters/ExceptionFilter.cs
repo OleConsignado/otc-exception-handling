@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
-using Otc.ExceptionHandling.Abstractions;
+using Otc.ExceptionHandling;
 using System;
 
 namespace Otc.Mvc.Filters
@@ -27,12 +27,15 @@ namespace Otc.Mvc.Filters
         {
             try
             {
-                exceptionHandler.HandleExceptionAsync(context.Exception, context.HttpContext).Wait();
+                exceptionHandler.HandleExceptionAsync(context.Exception)
+                    .GetAwaiter().GetResult();
                 context.ExceptionHandled = true;
             }
             catch (Exception e)
             {
-                logger.LogCritical(0, e, $"Provavelmente existe um BUG na biblioteca que implementa '{typeof(IExceptionHandler).FullName}'. Verifique a excecao logada para obter mais detalhes.");
+                logger.LogCritical(e, $"Provavelmente existe um BUG na biblioteca que " +
+                    $"implementa '{typeof(IExceptionHandler).FullName}'. " +
+                    $"Verifique a excecao logada para obter mais detalhes.");
             }
         }
     }

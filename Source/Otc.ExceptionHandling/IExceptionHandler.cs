@@ -2,10 +2,10 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Otc.ExceptionHandling.Abstractions
+namespace Otc.ExceptionHandling
 {
     public interface IExceptionHandler
     {
-        Task<int> HandleExceptionAsync(Exception exception, HttpContext httpContext);
+        Task HandleExceptionAsync(Exception exception);
     }
 }
