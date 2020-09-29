@@ -1,8 +1,5 @@
-﻿using Otc.ExceptionHandling.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Otc.ExceptionHandling.Abstractions
 {
@@ -38,7 +35,7 @@ namespace Otc.ExceptionHandling.Abstractions
         /// Expose - Log and returns the entire exception.
         /// Suppress - Log and returns only the base exception.
         /// Ignore - Ignore the entire exception.</param>
-        IExceptionHandlerConfigurationExpression ForException<TException>(int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError) 
+        IExceptionHandlerConfigurationExpression ForException<TException>(int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError)
             where TException : Exception;
 
         /// <summary>
@@ -52,5 +49,11 @@ namespace Otc.ExceptionHandling.Abstractions
         /// Ignore - Ignore the entire exception.</param>
         IExceptionHandlerConfigurationExpression ForException(Type exception, int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError);
 
+        /// <summary>
+        /// Lambda function that returns an instance of <see cref="IExceptionSerializer"/>
+        /// to be used in output serialization.
+        /// </summary>
+        /// <param name="serializer">Lambda that returns <see cref="IExceptionSerializer"/> instance</param>
+        IExceptionHandlerConfigurationExpression SetSerializer(Func<IExceptionSerializer> serializer);
     }
 }

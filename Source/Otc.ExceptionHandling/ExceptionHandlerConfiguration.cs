@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Otc.ExceptionHandling
 {
@@ -19,6 +18,8 @@ namespace Otc.ExceptionHandling
 
         public List<IExceptionHandlerEvent> Events { get; }
 
+        public Func<IExceptionSerializer> Serializer { get; private set; }
+
         public bool HasBehaviors => behaviors.Any();
 
         public ForExceptionBehavior ValidateBehavior(Exception ex)
@@ -31,7 +32,7 @@ namespace Otc.ExceptionHandling
 
             return null;
         }
-        
+
         private void Build(Action<IExceptionHandlerConfigurationExpression> action)
         {
             var configurationExpression = new ExceptionHandlerConfigurationExpression();
@@ -41,6 +42,8 @@ namespace Otc.ExceptionHandling
             this.Events.AddRange(configurationExpression.Events);
 
             this.behaviors = new Dictionary<Type, ForExceptionBehavior>(configurationExpression.Behaviors);
+
+            this.Serializer = configurationExpression.Serializer;
         }
     }
 }

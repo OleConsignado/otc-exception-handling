@@ -1,8 +1,6 @@
 ﻿using Otc.ExceptionHandling.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Otc.ExceptionHandling
 {
@@ -12,11 +10,14 @@ namespace Otc.ExceptionHandling
         {
             Events = new List<IExceptionHandlerEvent>();
             Behaviors = new Dictionary<Type, ForExceptionBehavior>();
+            Serializer = () => new ExceptionSerializer();
         }
 
         public List<IExceptionHandlerEvent> Events { get; }
 
         public Dictionary<Type, ForExceptionBehavior> Behaviors { get; }
+
+        public Func<IExceptionSerializer> Serializer { get; private set; }
 
         public IExceptionHandlerConfigurationExpression AddEvent(IExceptionHandlerEvent @event)
         {
@@ -38,6 +39,13 @@ namespace Otc.ExceptionHandling
         public IExceptionHandlerConfigurationExpression ForException(Type exception, int statusCode, ExceptionHandlerBehavior behavior = ExceptionHandlerBehavior.ClientError)
         {
             Behaviors.Add(exception, new ForExceptionBehavior() { StatusCode = statusCode, Behavior = behavior });
+
+            return this;
+        }
+
+        public IExceptionHandlerConfigurationExpression SetSerializer(Func<IExceptionSerializer> serializer)
+        {
+            Serializer = serializer;
 
             return this;
         }

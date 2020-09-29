@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Otc.DomainBase.Exceptions;
 using Otc.ExceptionHandling.Abstractions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,7 +28,7 @@ namespace Otc.ExceptionHandling
         public async Task<int> HandleExceptionAsync(Exception exception, HttpContext httpContext)
         {
             ExceptionHandlerBehavior? behavior = null;
-            (httpContext.Response.StatusCode, exception, behavior) = 
+            (httpContext.Response.StatusCode, exception, behavior) =
                 await ValidateConfigurationsAsync(httpContext.Response.StatusCode, exception);
 
             if (exception is AggregateException)
@@ -61,10 +58,10 @@ namespace Otc.ExceptionHandling
                 {
                     case ExceptionHandlerBehavior.ClientError:
                         return await GenerateCoreExceptionResponseAsync(exception, httpContext);
-                 
+
                     case ExceptionHandlerBehavior.ServerError:
                         return await GenerateInternalErrorResponseAsync(exception, httpContext);
-                 
+
                 }
             }
 
@@ -78,7 +75,6 @@ namespace Otc.ExceptionHandling
             if (exception is CoreException)
             {
                 behavior = ExceptionHandlerBehavior.ClientError;
-
                 httpContext.Response.StatusCode = 400;
             }
             else
@@ -87,7 +83,7 @@ namespace Otc.ExceptionHandling
                 httpContext.Response.StatusCode = 500;
             }
 
-            return behavior;
+            return await Task.FromResult(behavior);
         }
 
         private async Task<int> GenerateCoreExceptionResponseAsync(Exception e, HttpContext httpContext)
@@ -127,8 +123,8 @@ namespace Otc.ExceptionHandling
         {
             Exception exception = e;
             Guid logEntryId = Guid.NewGuid();
-            
-            logger.LogError(e, "{LogEntryId}: Ocorreu um erro não esperado.", logEntryId);           
+
+            logger.LogError(e, "{LogEntryId}: Ocorreu um erro não esperado.", logEntryId);
 
             var internalError = new InternalError()
             {
@@ -136,27 +132,15 @@ namespace Otc.ExceptionHandling
                 Exception = (IsDevelopmentEnvironment() ? exception.GetBaseException() : null)
             };
 
-            await GenerateResponseAsync( internalError, httpContext);
+            await GenerateResponseAsync(internalError, httpContext);
 
             return httpContext.Response.StatusCode;
         }
 
         private async Task GenerateResponseAsync(object output, HttpContext httpContext)
         {
-            var jsonSerializerSettings = new JsonSerializerSettings()
-            {
-                ContractResolver =
-                    new CoreExceptionJsonContractResolver()
-                    {
-                        IgnoreSerializableInterface = true
-                    },
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                NullValueHandling = NullValueHandling.Ignore,
-                MaxDepth = 10,
-                Formatting = !IsDevelopmentEnvironment() ? Formatting.None : Formatting.Indented
-            };
-
-            var message = JsonConvert.SerializeObject(output, jsonSerializerSettings);
+            var serializer = configuration?.Serializer() ?? new ExceptionSerializer();
+            var message = await serializer.SerializeAsync(output, httpContext);
 
             httpContext.Response.ContentType = "application/json";
             await httpContext.Response.WriteAsync(message, Encoding.UTF8);
@@ -186,7 +170,7 @@ namespace Otc.ExceptionHandling
 
                     if (behaviorResult != null)
                     {
-                        behavior = behaviorResult.Behavior;                       
+                        behavior = behaviorResult.Behavior;
 
                         finalStatusCode = behaviorResult.StatusCode;
                     }
