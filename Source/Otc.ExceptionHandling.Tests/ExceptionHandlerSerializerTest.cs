@@ -84,8 +84,9 @@ namespace Otc.ExceptionHandling.Tests
 
             var httpContext = CreateHttpContext(output =>
             {
-                Assert.Matches("\\{\\\r\\\n  \"logEntryId\": " +
-                    "\"[0-9a-f\\-]{36}\",\\\r\\\n  \"exception\": null\\\r\\\n\\}", output);
+                output = output.Replace("\r", string.Empty);
+                Assert.Matches("\\{\\\n  \"logEntryId\": " +
+                    "\"[0-9a-f\\-]{36}\",\\\n  \"exception\": null\\\n\\}", output);
             });
 
             await exceptionHandler.HandleExceptionAsync(new NullReferenceException(), httpContext);
@@ -102,8 +103,9 @@ namespace Otc.ExceptionHandling.Tests
 
             var httpContext = CreateHttpContext(output =>
             {
-                Assert.Equal("{\r\n  \"key\": \"DomainException\",\r\n" +
-                    "  \"errors\": [],\r\n  \"message\": \"erro\"\r\n}", output);
+                output = output.Replace("\r", string.Empty);
+                Assert.Equal("{\n  \"key\": \"DomainException\",\n" +
+                    "  \"errors\": [],\n  \"message\": \"erro\"\n}", output);
 
             });
 
@@ -122,8 +124,9 @@ namespace Otc.ExceptionHandling.Tests
 
             var httpContext = CreateHttpContext(output =>
             {
-                Assert.Matches("\\{\\\r\\\n  \"logEntryId\": " +
-                    "\"[0-9a-f\\-]{36}\",\\\r\\\n  \"exception\": null\\\r\\\n\\}", output);
+                output = output.Replace("\r", string.Empty);
+                Assert.Matches("\\{\\\n  \"logEntryId\": " +
+                    "\"[0-9a-f\\-]{36}\",\\\n  \"exception\": null\\\n\\}", output);
             });
 
             var statusCode = await exceptionHandler
