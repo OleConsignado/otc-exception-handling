@@ -1,7 +1,5 @@
-﻿using Otc.ExceptionHandling.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Otc.ExceptionHandling.Abstractions
 {
@@ -11,6 +9,11 @@ namespace Otc.ExceptionHandling.Abstractions
         /// Registered events on configuration
         /// </summary>
         List<IExceptionHandlerEvent> Events { get; }
+
+        /// <summary>
+        /// Lambda function that returns an instance of <see cref="IExceptionSerializer"/>.
+        /// </summary>
+        Func<IExceptionSerializer> Serializer { get; }
 
         /// <summary>
         /// Validate if there is configuration for specific exceptions on exception handling setup
